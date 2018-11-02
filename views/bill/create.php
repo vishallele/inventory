@@ -19,6 +19,7 @@ $this->title = 'Bill Invoice';
         'model' => $model,
         'arrBillDetails' => $arrBillDetails,
         'form_title' => 'Create New Bill',
-        'button_text' => 'Save'
+        'button_text' => 'Save',
+        'spare_parts' =>$spare_parts
     ]) ?>
 </section>
