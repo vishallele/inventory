@@ -40,7 +40,7 @@ class BillDetails extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['bill_master_id', 'spare_part_id', 'quantity', 'rate'], 'required'],
+            [['spare_part_id', 'quantity', 'rate'], 'required'],
             [['bill_master_id', 'spare_part_id', 'is_deleted'], 'integer'],
             [['quantity', 'rate'], 'number'],
             [['bill_master_id'], 'exist', 'skipOnError' => true, 'targetClass' => BillMaster::className(), 'targetAttribute' => ['bill_master_id' => 'id']],

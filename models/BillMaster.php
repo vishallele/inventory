@@ -3,6 +3,8 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
+use yii\behaviors\AttributeBehavior;
 
 /**
  * This is the model class for table "bill_master".
@@ -43,7 +45,7 @@ class BillMaster extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['customer_id', 'bill_no', 'purchase_order_no', 'bill_date', 'bill_subtotal_amount', 'bill_total_amount', 'bill_paid_amount', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate', 'created_at', 'updated_at'], 'required'],
+            [['customer_id', 'bill_no', 'purchase_order_no', 'bill_date', 'bill_subtotal_amount', 'bill_total_amount', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate'], 'required'],
             [['customer_id', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate', 'is_active', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['bill_date', 'bill_due_date'], 'safe'],
             [['bill_subtotal_amount', 'bill_total_amount', 'bill_paid_amount'], 'number'],
@@ -91,5 +93,29 @@ class BillMaster extends \yii\db\ActiveRecord
     public function getCustomer()
     {
         return $this->hasOne(Customer::className(), ['id' => 'customer_id']);
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+            ],
+            [
+                'class' => AttributeBehavior::className(),
+                'attributes' => [
+                    // update 1 attribute 'created' OR multiple attribute ['created','updated']
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['bill_date','bill_due_date'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['bill_date','bill_due_date'],
+                ],
+                'value' => function ($event) {
+                    return date('Y-m-d H:i:s');
+                },
+            ]
+        ];
     }
 }

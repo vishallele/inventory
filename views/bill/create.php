@@ -21,6 +21,7 @@ $this->title = 'Bill Invoice';
         'form_title' => 'Create New Bill',
         'button_text' => 'Generate Bill',
         'spare_parts' =>$spare_parts,
-        'customers' => $customers
+        'customers' => $customers,
+        'unique_invoice_no' => $unique_invoice_no
     ]) ?>
 </section>

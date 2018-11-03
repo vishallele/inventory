@@ -23,6 +23,7 @@ $this->registerCssFile("@web/css/select2.min.css", [
 <?= $form->field($model, 'bill_cgst_rate')->hiddenInput(['value' => 9])->label(false); ?>
 <?= $form->field($model, 'bill_sgst_rate')->hiddenInput(['value' => 9])->label(false); ?>
 <?= $form->field($model, 'bill_igst_rate')->hiddenInput(['value' => 9])->label(false); ?>
+<?= $form->field($model, 'bill_no')->hiddenInput(['value' => $unique_invoice_no])->label(false); ?>
 
 <div class="row">
 

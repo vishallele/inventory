@@ -12,6 +12,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use app\models\SparePart;
 use app\models\Customer;
+use app\base\Model;
 
 /**
  * BillController implements the CRUD actions for BillMaster model.
@@ -71,6 +72,7 @@ class BillController extends Controller
         $model = new BillMaster();
         $spare_parts = ArrayHelper::map(SparePart::find()->all(),'id','spare_part_serial_no');
         $customers = ArrayHelper::map(Customer::find()->all(),'id','company_name');
+        $unique_invoice_no = Yii::$app->helper->generateBillInvoiceNumber();
 
         $count = count(Yii::$app->request->post('BillDetails', []));
         $arrBillDetails = [new BillDetails()];
@@ -79,20 +81,36 @@ class BillController extends Controller
             $arrBillDetails[] = new BillDetails();
         }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if (Model::loadMultiple($arrBillDetails, Yii::$app->request->post()) && Model::validateMultiple($arrBillDetails)) {
-                foreach ($arrBillDetails as $BillDetails) {
-                    $BillDetails->save(false);
+        $transaction = \Yii::$app->db->beginTransaction();    
+
+        try {
+
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                $arrBillDetails = Model::createMultiple(BillDetails::classname());
+                if ( Model::loadMultiple($arrBillDetails, Yii::$app->request->post()) && Model::validateMultiple($arrBillDetails)) {
+                    foreach ($arrBillDetails as $BillDetails) {
+                        $BillDetails->bill_master_id = $model->id;
+                        if( !$BillDetails->save(false) ) {
+                            $transaction->rollBack();
+                            break;
+                        }
+                    }
+                    $transaction->commit();
+                    return $this->redirect(['index']);
+                } else {
+                    $transaction->rollBack();
                 }
-                return $this->redirect('index');
             }
+        }catch(Exception $e){
+            $transaction->rollBack();
         }
 
         return $this->render('create', [
             'model' => $model,
             'arrBillDetails' => $arrBillDetails,
             'spare_parts' =>$spare_parts,
-            'customers' => $customers
+            'customers' => $customers,
+            'unique_invoice_no' => $unique_invoice_no
         ]);
     }
 
