@@ -83,6 +83,39 @@ class SparePartController extends Controller
     }
 
     /**
+     * return single spare part details in json format
+     * @return mixed
+     */
+    public function actionSpareDetails(){
+
+        $spare_part_response = [];    
+
+        try {
+            if( Yii::$app->request->post('spare_part_id') !== null ){
+                $spare_part_response = [
+                    'spare_part_details' => $this->findModel(Yii::$app->request->post('spare_part_id')),
+                    'code' => 200
+                ];
+            } else {
+                $spare_part_response = [
+                    'spare_part_details' => null,
+                    'code' => 500
+                ];
+                // do your query stuff here
+            }
+        }catch(Exception $e){
+            $spare_part_response = [
+                'spare_part_details' => $e,
+                'code' => 500
+            ];
+        }
+    
+        // return Json    
+        return \yii\helpers\Json::encode($spare_part_response);
+
+    }
+
+    /**
      * Deletes an existing SparePart model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id

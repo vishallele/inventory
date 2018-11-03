@@ -19,7 +19,8 @@ $this->title = 'Bill Invoice';
         'model' => $model,
         'arrBillDetails' => $arrBillDetails,
         'form_title' => 'Create New Bill',
-        'button_text' => 'Save',
-        'spare_parts' =>$spare_parts
+        'button_text' => 'Generate Bill',
+        'spare_parts' =>$spare_parts,
+        'customers' => $customers
     ]) ?>
 </section>

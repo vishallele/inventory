@@ -59,7 +59,7 @@ class BillMaster extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'customer_id' => 'Customer ID',
+            'customer_id' => 'Company Name',
             'bill_no' => 'Bill No',
             'purchase_order_no' => 'Purchase Order No',
             'bill_date' => 'Bill Date',

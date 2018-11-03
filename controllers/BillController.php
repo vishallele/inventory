@@ -11,6 +11,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use app\models\SparePart;
+use app\models\Customer;
 
 /**
  * BillController implements the CRUD actions for BillMaster model.
@@ -68,7 +69,8 @@ class BillController extends Controller
     public function actionCreate()
     {
         $model = new BillMaster();
-        $spare_parts = ArrayHelper::map(SparePart::find()->all(),'id','spare_part_name');
+        $spare_parts = ArrayHelper::map(SparePart::find()->all(),'id','spare_part_serial_no');
+        $customers = ArrayHelper::map(Customer::find()->all(),'id','company_name');
 
         $count = count(Yii::$app->request->post('BillDetails', []));
         $arrBillDetails = [new BillDetails()];
@@ -89,7 +91,8 @@ class BillController extends Controller
         return $this->render('create', [
             'model' => $model,
             'arrBillDetails' => $arrBillDetails,
-            'spare_parts' =>$spare_parts
+            'spare_parts' =>$spare_parts,
+            'customers' => $customers
         ]);
     }
 
