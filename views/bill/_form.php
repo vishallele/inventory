@@ -18,8 +18,9 @@ $this->registerCssFile("@web/css/select2.min.css", [
 
 <?php $form = ActiveForm::begin(); ?>
 
-<?= $form->field($model, 'bill_subtotal_amount')->hiddenInput(['value' => 0.00])->label(false); ?>
-<?= $form->field($model, 'bill_total_amount')->hiddenInput(['value' => 0.00])->label(false); ?>
+
+<?= $form->field($model, 'bill_subtotal_amount')->hiddenInput()->label(false); ?>
+<?= $form->field($model, 'bill_total_amount')->hiddenInput()->label(false); ?>
 <?= $form->field($model, 'bill_cgst_rate')->hiddenInput(['value' => 9])->label(false); ?>
 <?= $form->field($model, 'bill_sgst_rate')->hiddenInput(['value' => 9])->label(false); ?>
 <?= $form->field($model, 'bill_igst_rate')->hiddenInput(['value' => 9])->label(false); ?>
@@ -136,6 +137,13 @@ $this->registerCssFile("@web/css/select2.min.css", [
             
                 
                 <?php  $i = 0; foreach ($arrBillDetails as $index => $BillDetails) { ?>
+                    
+                    <?php
+                            // necessary for update action.
+                            if (! $BillDetails->isNewRecord) {
+                                echo Html::activeHiddenInput($BillDetails, "[{$i}]id");
+                            }
+                    ?>
 
                     <tr class="item">
 
@@ -147,7 +155,11 @@ $this->registerCssFile("@web/css/select2.min.css", [
                         </td>
 
                         <td> 
-                            <?= $form->field($BillDetails, "[$index]spare_part_description")->label(false); ?>
+                            <?php if($BillDetails->isNewRecord){ ?>
+                                <?= $form->field($BillDetails, "[$index]spare_part_description")->label(false); ?>
+                            <?php } else { ?>
+                                <?= $form->field($BillDetails, "[$index]spare_part_description")->textInput(['value' => $BillDetails->sparePart->spare_part_name])->label(false); ?>
+                            <?php } ?>
                         </td>
 
                         <td> 
@@ -158,8 +170,15 @@ $this->registerCssFile("@web/css/select2.min.css", [
                             <?= $form->field($BillDetails, "[$index]quantity")->textInput(['class' => 'form-control qty'])->label(false); ?>
                         </td>
 
-                        <td> 
-                            <?= $form->field($BillDetails, "[$index]amount")->textInput(['class' => 'form-control amt'])->label(false); ?>
+                        <td>
+                            <?php if($BillDetails->isNewRecord){ ?>
+                                <?= $form->field($BillDetails, "[$index]amount")->textInput(['class' => 'form-control amt'])->label(false); ?>
+                            <?php 
+                                 } else { 
+                                 $amount = $BillDetails->rate * $BillDetails->quantity;
+                            ?>
+                                <?= $form->field($BillDetails, "[$index]amount")->textInput(['class' => 'form-control amt','value' => $amount])->label(false); ?>
+                            <?php } ?>
                         </td>
 
                         <td> 
@@ -199,19 +218,42 @@ $this->registerCssFile("@web/css/select2.min.css", [
         <div class="box-body box-profile">
             <ul class="list-group list-group-unbordered">
             <li class="list-group-item">
-                <b>Sub Total</b> <a class="pull-right" id="sbtot">0.00</a>
+                <b>Sub Total</b> 
+                <a class="pull-right" id="sbtot">
+                    <?= ( $model->isNewRecord ) ? '0.00' : $model->bill_subtotal_amount; ?>
+                </a>
+            </li>
+            <?php 
+                if( !$model->isNewRecord ){
+                    $cgst = $model->bill_subtotal_amount*9/100;
+                    $sgst = $model->bill_subtotal_amount*9/100;
+                    $igst = $cgst + $sgst;
+                }
+            ?>
+            <li class="list-group-item">
+                <b>CGST (9%)</b> 
+                <a class="pull-right" id="cgst">
+                    <?= ( $model->isNewRecord ) ? '0.00' : number_format( $cgst, 2 ); ?>
+                </a>
             </li>
             <li class="list-group-item">
-                <b>CGST (9%)</b> <a class="pull-right" id="cgst">0.00</a>
+                <b>SGST (9%)</b>
+                <a class="pull-right" id="sgst">
+                    <?= ( $model->isNewRecord ) ? '0.00' : number_format( $sgst, 2 ); ?>
+                </a>
             </li>
             <li class="list-group-item">
-                <b>SGST (9%)</b> <a class="pull-right" id="sgst">0.00</a>
+                <b>IGST (18%)</b> 
+                <a class="pull-right" id="igst">
+                    <?= ( $model->isNewRecord ) ? '0.00' : number_format( $igst, 2); ?>
+                </a>
             </li>
+
             <li class="list-group-item">
-                <b>IGST (18%)</b> <a class="pull-right" id="igst">0.00</a>
-            </li>
-            <li class="list-group-item">
-                <b>Total Amount</b> <a class="pull-right" id="totamt">0.00</a>
+                <b>Total Amount</b> 
+                <a class="pull-right" id="totamt">
+                    <?= ( $model->isNewRecord ) ? '0.00' : $model->bill_total_amount; ?>
+                </a>
             </li>
             </ul>
             <?= Html::submitButton( $button_text, ['class' => 'btn btn-block btn-success']) ?>
@@ -310,8 +352,20 @@ $this->registerCssFile("@web/css/select2.min.css", [
 
                 $('#billmaster-bill_subtotal_amount').val(subtotal.toFixed(2));
                 $('#billmaster-bill_total_amount').val(total_amount.toFixed(2));
+           } else {
+                $('#cgst').text(cgst.toFixed(2));
+                $('#sgst').text(sgst.toFixed(2));
+                $('#igst').text(igst.toFixed(2));
+                $('#totamt').text(total_amount.toFixed(2));
+
+                $('#billmaster-bill_subtotal_amount').val(subtotal.toFixed(2));
+                $('#billmaster-bill_total_amount').val(total_amount.toFixed(2));
            }
 
+        });
+
+        $('.dynamicform_wrapper').on('afterDelete', function(e) {
+            $('.amt').trigger('change');
         });
 
         ",

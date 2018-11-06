@@ -12,6 +12,9 @@ use app\models\BillMaster;
  */
 class BillSearch extends BillMaster
 {
+
+    public $customer;
+
     /**
      * {@inheritdoc}
      */
@@ -19,7 +22,7 @@ class BillSearch extends BillMaster
     {
         return [
             [['id', 'customer_id', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate', 'is_active', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['bill_no', 'purchase_order_no', 'bill_date', 'bill_due_date'], 'safe'],
+            [['bill_no', 'purchase_order_no', 'bill_date', 'bill_due_date','customer'], 'safe'],
             [['bill_subtotal_amount', 'bill_total_amount', 'bill_paid_amount'], 'number'],
         ];
     }
@@ -44,11 +47,22 @@ class BillSearch extends BillMaster
     {
         $query = BillMaster::find();
 
+        $query->joinWith(['customer']);
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
+
+         // Important: here is how we set up the sorting
+        // The key is the attribute name on our "TourSearch" instance
+        $dataProvider->sort->attributes['customer'] = [
+            // The tables are the ones our relation are configured to
+            // in my case they are prefixed with "tbl_"
+            'asc' => ['customer.company_name' => SORT_ASC],
+            'desc' => ['customer.company_name' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -75,6 +89,8 @@ class BillSearch extends BillMaster
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
+
+        $query->andFilterWhere(['like', 'customer.company_name', $this->customer]);
 
         $query->andFilterWhere(['like', 'bill_no', $this->bill_no])
             ->andFilterWhere(['like', 'purchase_order_no', $this->purchase_order_no]);

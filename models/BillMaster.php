@@ -47,7 +47,7 @@ class BillMaster extends \yii\db\ActiveRecord
         return [
             [['customer_id', 'bill_no', 'purchase_order_no', 'bill_date', 'bill_subtotal_amount', 'bill_total_amount', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate'], 'required'],
             [['customer_id', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate', 'is_active', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['bill_date', 'bill_due_date'], 'safe'],
+            [['bill_date', 'bill_due_date','customer'], 'safe'],
             [['bill_subtotal_amount', 'bill_total_amount', 'bill_paid_amount'], 'number'],
             [['bill_no', 'purchase_order_no'], 'string', 'max' => 50],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::className(), 'targetAttribute' => ['customer_id' => 'id']],
@@ -62,12 +62,12 @@ class BillMaster extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'customer_id' => 'Company Name',
-            'bill_no' => 'Bill No',
-            'purchase_order_no' => 'Purchase Order No',
+            'bill_no' => 'Bill Number',
+            'purchase_order_no' => 'PO Number',
             'bill_date' => 'Bill Date',
             'bill_due_date' => 'Bill Due Date',
-            'bill_subtotal_amount' => 'Bill Subtotal Amount',
-            'bill_total_amount' => 'Bill Total Amount',
+            'bill_subtotal_amount' => 'Subtotal Amount',
+            'bill_total_amount' => 'Total Amount',
             'bill_paid_amount' => 'Bill Paid Amount',
             'bill_cgst_rate' => 'Bill Cgst Rate',
             'bill_sgst_rate' => 'Bill Sgst Rate',
@@ -108,12 +108,12 @@ class BillMaster extends \yii\db\ActiveRecord
             [
                 'class' => AttributeBehavior::className(),
                 'attributes' => [
-                    // update 1 attribute 'created' OR multiple attribute ['created','updated']
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['bill_date','bill_due_date'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['bill_date','bill_due_date'],
+                    //update 1 attribute 'bill_date'
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['bill_date'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['bill_date'],
                 ],
                 'value' => function ($event) {
-                    return date('Y-m-d H:i:s');
+                    return date('Y-m-d H:i:s', strtotime($this->bill_date));
                 },
             ]
         ];

@@ -124,13 +124,53 @@ class BillController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $arrBillDetails = $model->billDetails;
+        $spare_parts = ArrayHelper::map(SparePart::find()->all(),'id','spare_part_serial_no');
+        $customers = ArrayHelper::map(Customer::find()->all(),'id','company_name');
+        $unique_invoice_no = $model->bill_no;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+
+            $oldIDs = ArrayHelper::map($arrBillDetails, 'id', 'id');
+            $arrBillDetails = Model::createMultiple(BillDetails::classname(), $arrBillDetails);
+            Model::loadMultiple($arrBillDetails, Yii::$app->request->post());
+            $deletedIDs = array_diff($oldIDs, array_filter(ArrayHelper::map($arrBillDetails, 'id', 'id')));
+
+            // validate all models
+            $valid = $model->validate();
+            $valid = Model::validateMultiple($arrBillDetails) && $valid;
+  
+            if ($valid) {
+                $transaction = \Yii::$app->db->beginTransaction();
+                try {
+                    if ($flag = $model->save(false)) {
+                        if (! empty($deletedIDs)) {
+                            BillDetails::deleteAll(['id' => $deletedIDs]);
+                        }
+                        foreach ($arrBillDetails as $BillDetails) {
+                            $BillDetails->bill_master_id = $model->id;
+                            if (! ($flag = $BillDetails->save(false))) {
+                                $transaction->rollBack();
+                                break;
+                            }
+                        }
+                    }
+                    if ($flag) {
+                        $transaction->commit();
+                        return $this->redirect(['index']);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
         }
 
         return $this->render('update', [
             'model' => $model,
+            'arrBillDetails' => $arrBillDetails,
+            'spare_parts' =>$spare_parts,
+            'customers' => $customers,
+            'unique_invoice_no' => $unique_invoice_no
         ]);
     }
 

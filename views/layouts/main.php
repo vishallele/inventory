@@ -110,6 +110,11 @@ AppAsset::register($this);
                         <i class="fa fa-gear"></i> <span>Spare Parts</span>
                     </a>
                 </li>
+                <li>
+                    <a href="<?php echo Url::toRoute(['bill/index']); ?>">
+                        <i class="fa fa-file-text"></i> <span>Bill Invoices</span>
+                    </a>
+                </li>
             </ul>
         </section>
         <!-- /.sidebar -->

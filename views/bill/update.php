@@ -5,17 +5,24 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\BillMaster */
 
-$this->title = 'Update Bill Master: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Bill Masters', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->title = 'Update Bill Invoice Number: '.$unique_invoice_no;
 ?>
-<div class="bill-master-update">
 
+<!-- Content Header (Page header) -->
+<section class="content-header">
     <h1><?= Html::encode($this->title) ?></h1>
+</section>
+
+<section class="content">
 
     <?= $this->render('_form', [
         'model' => $model,
+        'arrBillDetails' => $arrBillDetails,
+        'form_title' => 'Create New Bill',
+        'button_text' => 'Update Bill',
+        'spare_parts' =>$spare_parts,
+        'customers' => $customers,
+        'unique_invoice_no' => $unique_invoice_no
     ]) ?>
 
-</div>
+</section>
