@@ -2,32 +2,40 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\web\View;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\BillMaster */
 
 $this->title = $model->id;
+
+$subtotal = 0;
+$gst = 0;
+$cgst = 0; 
+$igst = 0;
+$total_amount = 0;
 ?>
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
       <h1>
-        Invoice
-        <small>#007612</small>
+        Bill Invoice
+        <small><?= $model->bill_no; ?></small>
       </h1>      
 </section>
 
 <section class="invoice">
+
       <!-- title row -->
       <div class="row">
         <div class="col-xs-12">
           <h2 class="page-header">
             <i class="fa fa-globe"></i> Accord Engineering
-            <small class="pull-right">Date: 2/10/2014</small>
           </h2>
         </div>
         <!-- /.col -->
       </div>
+
       <!-- info row -->
       <div class="row invoice-info">
         <!-- /.col -->
@@ -40,17 +48,16 @@ $this->title = $model->id;
             <?php echo (!empty($model->customer->city)) ? $model->customer->city.',' : ''; ?> <?php echo (!empty($model->customer->state)) ? $model->customer->state.',' : ''; ?>
             <?php echo (!empty($model->customer->zipcode)) ? '- '.$model->customer->zipcode.',' : ''; ?>
             <br>
-            Phone: (555) 539-1037<br>
-            Email: john.doe@example.com
+            Phone: <?php echo (!empty($model->customer->phone)) ? '- '.$model->customer->phone.',' : ''; ?><br>
+            Email: <?php echo (!empty($model->customer->email)) ? '- '.$model->customer->email.',' : ''; ?>
           </address>
         </div>
         <!-- /.col -->
         <div class="col-sm-6 invoice-col">
-          <b>Invoice #007612</b><br>
-          <br>
-          <b>Order ID:</b> 4F3S8J<br>
-          <b>Payment Due:</b> 2/22/2014<br>
-          <b>Account:</b> 968-34567
+          <br/>
+          <b>Bill Invoice No: <?= $model->bill_no; ?></b><br>
+          <b>PO No: </b><?= $model->purchase_order_no; ?><br>
+          <b>Bill Date: </b><?= date('d M Y', strtotime($model->bill_date)); ?><br>
         </div>
         <!-- /.col -->
       </div>
@@ -62,42 +69,31 @@ $this->title = $model->id;
           <table class="table table-striped">
             <thead>
             <tr>
-              <th>Qty</th>
-              <th>Product</th>
-              <th>Serial #</th>
-              <th>Description</th>
-              <th>Subtotal</th>
+              <th>Sr. No.</th>
+              <th>Drg. No.</th>
+              <th>Perticulars</th>
+              <th>HSN No.</th>
+              <th>Qty.</th>
+              <th>Rate</th>
+              <th style="text-align:right;">Amount</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-              <td>1</td>
-              <td>Call of Duty</td>
-              <td>455-981-221</td>
-              <td>El snort testosterone trophy driving gloves handsome</td>
-              <td>$64.50</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>Need for Speed IV</td>
-              <td>247-925-726</td>
-              <td>Wes Anderson umami biodiesel</td>
-              <td>$50.00</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>Monsters DVD</td>
-              <td>735-845-642</td>
-              <td>Terry Richardson helvetica tousled street art master</td>
-              <td>$10.70</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>Grown Ups Blue Ray</td>
-              <td>422-568-642</td>
-              <td>Tousled lomo letterpress</td>
-              <td>$25.99</td>
-            </tr>
+              <?php if(!empty($model->billDetails)) { $r = 1; ?>
+                <?php foreach( $model->billDetails as $billDetail ) { ?>
+                      <tr>
+                        <td><?= $r; ?></td>
+                        <td><?= $billDetail->sparePart->spare_part_serial_no; ?></td>
+                        <td><?= $billDetail->sparePart->spare_part_name; ?></td>
+                        <td><?= $billDetail->sparePart->spare_part_hsn_no; ?></td>
+                        <td><?= $billDetail->quantity; ?></td>
+                        <td><?= $billDetail->rate; ?></td>
+                        <?php $amt = $billDetail->quantity * $billDetail->rate; ?>
+                        <td style="text-align:right;"><?= number_format( $amt, 2 ); ?></td>
+                      </tr>
+                      <?php $subtotal += $amt; ?>
+              <?php $r++; } } ?>
+              
             </tbody>
           </table>
         </div>
@@ -107,39 +103,52 @@ $this->title = $model->id;
 
       <div class="row">
         <!-- accepted payments column -->
-        <div class="col-xs-6">
-          <p class="lead">Payment Methods:</p>
-          <img src="../../dist/img/credit/visa.png" alt="Visa">
-          <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
-          <img src="../../dist/img/credit/american-express.png" alt="American Express">
-          <img src="../../dist/img/credit/paypal2.png" alt="Paypal">
-
+        <div class="col-xs-4">
+          <p class="lead">GST No. : 27AAJPZ6121C1ZN</p>
           <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
-            Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles, weebly ning heekya handango imeem plugg
-            dopplr jibjab, movity jajah plickers sifteo edmodo ifttt zimbra.
+            I/We hereby certify that my/our registration certificate under the GST ACT 2017 is in force
+            on the date on which the supply of the goods specified in this tax invoice is made by me/us
+            and that the transaction of supplies covered by this tax invoice has been effected by me/us
+            and it shall be accounted for in the turnover of supplies while filling of return and the due
+            tax if any.
+          </p>
+        </div>
+        <div class="col-xs-4">
+          <p class="lead">Company Bank Detail's</p>
+          <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
+               Bank Name: Union Bank of India, Saswad <br>
+               A/c No.: 705801010050034 <br>
+               IFSC Code : UBIN0570583   
           </p>
         </div>
         <!-- /.col -->
-        <div class="col-xs-6">
-          <p class="lead">Amount Due 2/22/2014</p>
-
+        <div class="col-xs-4">
           <div class="table-responsive">
             <table class="table">
+              <?php 
+                  $cgst = $subtotal*9/100;
+                  $sgst = $subtotal*9/100;
+                  $igst = $cgst + $sgst;
+              ?>
               <tr>
-                <th style="width:50%">Subtotal:</th>
-                <td>$250.30</td>
+                <th style="width:50%;text-align:right;">Subtotal:</th>
+                <td style="text-align:right;"><?= number_format( $subtotal, 2 ); ?></td>
               </tr>
               <tr>
-                <th>Tax (9.3%)</th>
-                <td>$10.34</td>
+                <th style="text-align:right;">CGST (<?= $model->bill_cgst_rate.'%';?>)</th>
+                <td style="text-align:right;"><?= number_format( $cgst, 2 ); ?></td>
               </tr>
               <tr>
-                <th>Shipping:</th>
-                <td>$5.80</td>
+                <th style="text-align:right;">SGST (<?= $model->bill_sgst_rate.'%';?>)</th>
+                <td style="text-align:right;"><?= number_format( $sgst, 2 ); ?></td>
               </tr>
               <tr>
-                <th>Total:</th>
-                <td>$265.24</td>
+                <th style="text-align:right;">IGST (18%)</th>
+                <td style="text-align:right;"><?= number_format( $igst, 2 ); ?></td>
+              </tr>
+              <tr>
+                <th style="text-align:right;">Total Amount</th>
+                <td style="text-align:right;"><?= number_format( $model->bill_total_amount, 2); ?></td>
               </tr>
             </table>
           </div>
@@ -148,17 +157,37 @@ $this->title = $model->id;
       </div>
       <!-- /.row -->
 
+      <div class="row">
+
+      </div>
+
+      <div class="row clearfix">
+        <br/><br/><br/>
+        <div class="col-xs-12">
+           <p class="lead pull-left">Recievers Signature</p>       
+           <p class="lead pull-right">For Accord Engineering Solutions.</p>
+        </div>
+      </div>
+
+
       <!-- this row will not appear when printing -->
       <div class="row no-print">
         <div class="col-xs-12">
-          <a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fa fa-print"></i> Print</a>
-          <button type="button" class="btn btn-success pull-right"><i class="fa fa-credit-card"></i> Submit Payment
-          </button>
-          <button type="button" class="btn btn-primary pull-right" style="margin-right: 5px;">
-            <i class="fa fa-download"></i> Generate PDF
-          </button>
+          <a href="#" target="_blank" class="btn btn-default printMe"><i class="fa fa-print"></i> Print</a>
         </div>
       </div>
     </section>
     <!-- /.content -->
     <div class="clearfix"></div>
+
+<?php 
+
+$this->registerJs('
+                 
+    $(".printMe").click(function(){
+      window.print();
+    });
+
+',View::POS_READY,'bill-invoice-print');
+
+?>
