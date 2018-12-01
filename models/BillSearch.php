@@ -22,7 +22,7 @@ class BillSearch extends BillMaster
     {
         return [
             [['id', 'customer_id', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate', 'is_active', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['bill_no', 'purchase_order_no', 'bill_date', 'bill_due_date','customer'], 'safe'],
+            [['bill_no', 'purchase_order_no', 'bill_date', 'purchase_order_date','customer'], 'safe'],
             [['bill_subtotal_amount', 'bill_total_amount', 'bill_paid_amount'], 'number'],
         ];
     }
@@ -77,7 +77,7 @@ class BillSearch extends BillMaster
             'id' => $this->id,
             'customer_id' => $this->customer_id,
             'bill_date' => $this->bill_date,
-            'bill_due_date' => $this->bill_due_date,
+            'purchase_order_date' => $this->purchase_order_date,
             'bill_subtotal_amount' => $this->bill_subtotal_amount,
             'bill_total_amount' => $this->bill_total_amount,
             'bill_paid_amount' => $this->bill_paid_amount,

@@ -19,6 +19,12 @@ $config = [
         'helper' => [
             'class' => 'app\components\HelperComponent',
         ],
+        'formatter' => [
+            'class' => 'yii\i18n\Formatter',
+            'dateFormat' => 'php:j M Y',
+            'datetimeFormat' => 'php:Y-m-d H:i:s',
+            'timeFormat' => 'php:H:i:s',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

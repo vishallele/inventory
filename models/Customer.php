@@ -40,11 +40,12 @@ class Customer extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['company_name', 'email'], 'required'],
+            [['company_name', 'gst_number'], 'required'],
             [['is_active', 'is_deleted'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['company_name', 'address_1', 'address_2'], 'string', 'max' => 100],
-            [['contact_person_name', 'email'], 'string', 'max' => 150],
+            [['gst_number'], 'string', 'max' => 20],
+            [['contact_person_name'], 'string', 'max' => 150],
             [['phone', 'alt_phone'], 'string', 'max' => 20],
             [['city', 'state'], 'string', 'max' => 40],
             [['zipcode'], 'string', 'max' => 6],
@@ -60,7 +61,7 @@ class Customer extends \yii\db\ActiveRecord
             'id' => 'ID',
             'company_name' => 'Company Name',
             'contact_person_name' => 'Contact Person Name',
-            'email' => 'Email',
+            'gst_number' => 'GST Number',
             'phone' => 'Phone Number',
             'alt_phone' => 'Alternate Phone Number',
             'address_1' => 'Address 1',

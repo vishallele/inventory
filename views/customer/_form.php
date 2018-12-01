@@ -28,7 +28,7 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'contact_person_name')->textInput(['maxlength' => true]) ?>
 
-            <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'gst_number')->textInput(['maxlength' => true]) ?>
 
             <?= $form->field($model, 'phone')->textInput(['maxlength' => true]) ?>
 

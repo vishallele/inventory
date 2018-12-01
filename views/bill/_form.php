@@ -21,6 +21,7 @@ $this->registerCssFile("@web/css/select2.min.css", [
 
 <?= $form->field($model, 'bill_subtotal_amount')->hiddenInput()->label(false); ?>
 <?= $form->field($model, 'bill_total_amount')->hiddenInput()->label(false); ?>
+<?= $form->field($model, 'bill_paid_amount')->hiddenInput()->label(false); ?>
 <?= $form->field($model, 'bill_cgst_rate')->hiddenInput(['value' => 9])->label(false); ?>
 <?= $form->field($model, 'bill_sgst_rate')->hiddenInput(['value' => 9])->label(false); ?>
 <?= $form->field($model, 'bill_igst_rate')->hiddenInput(['value' => 9])->label(false); ?>
@@ -56,7 +57,10 @@ $this->registerCssFile("@web/css/select2.min.css", [
             <div class="col-md-6">
 
                 <?= $form->field($model, 'bill_date')->widget(DatePicker::classname(), [
-                        'options' => ['placeholder' => 'Bill Date','value' => date('j M Y')],
+                        'options' => [
+                            'placeholder' => 'Bill Date',
+                            'value' => ( $model->isNewRecord ) ? date('j M Y') : Yii::$app->formatter->asDate($model->bill_date) 
+                        ],
                         'pluginOptions' => [
                             'autoclose'=>true,
                             'format' => 'd M yyyy'
@@ -64,8 +68,11 @@ $this->registerCssFile("@web/css/select2.min.css", [
                     ]); 
                 ?>
 
-                <?= $form->field($model, 'bill_due_date')->widget(DatePicker::classname(), [
-                        'options' => ['placeholder' => 'Bill Due Date'],
+                <?= $form->field($model, 'purchase_order_date')->widget(DatePicker::classname(), [
+                        'options' => [
+                            'placeholder' => 'Purchase Order Date',
+                            'value' => (!empty($model->purchase_order_date)) ? Yii::$app->formatter->asDate($model->purchase_order_date) : ''
+                        ],
                         'pluginOptions' => [
                             'autoclose'=>true,
                             'format' => 'd M yyyy'
@@ -75,6 +82,12 @@ $this->registerCssFile("@web/css/select2.min.css", [
 
             </div>
 
+            <div class="col-md-6">
+                <?= $form->field($model, 'dispatched_by'); ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'vehicle_number'); ?>
+            </div>
         </div>
 
     </div>
@@ -255,6 +268,21 @@ $this->registerCssFile("@web/css/select2.min.css", [
                     <?= ( $model->isNewRecord ) ? '0.00' : $model->bill_total_amount; ?>
                 </a>
             </li>
+
+            <li class="list-group-item">
+                <b>Amount Paid</b> 
+                <a class="pull-right" id="amtpaid">
+                    <?= ( $model->isNewRecord ) ? '0.00' : $model->bill_paid_amount; ?>
+                </a>
+            </li>
+
+            <li class="list-group-item">
+                <b>Balance</b> 
+                <a class="pull-right" id="balanceamt">
+                    <?= number_format(($model->bill_total_amount - $model->bill_paid_amount),2); ?>
+                </a>
+            </li>
+
             </ul>
             <?= Html::submitButton( $button_text, ['class' => 'btn btn-block btn-success']) ?>
             <?= Html::a('Cancel', ['index'], ['class' => 'btn btn-block btn-danger']) ?>
@@ -320,6 +348,7 @@ $this->registerCssFile("@web/css/select2.min.css", [
             total = quantity * rate;
             $('#billdetails-'+row_id+'-amount').val(total.toFixed(2));
             $('.amt').trigger('change');
+            $('.amt-paid').trigger('change');
         });
 
         $(document).on('change','.amt',function(){
@@ -366,6 +395,35 @@ $this->registerCssFile("@web/css/select2.min.css", [
 
         $('.dynamicform_wrapper').on('afterDelete', function(e) {
             $('.amt').trigger('change');
+            $('.amt-paid').trigger('change');
+        });
+
+        $('.amt-paid').on('change',function(e){
+            var total_amount = 0;
+            var amount_paid = 0;
+            var balance = 0;
+
+            total_amount = parseInt( $('#billmaster-bill_total_amount').val());
+            amount_paid = parseInt($(this).val());
+            if( total_amount && amount_paid ) {
+                if( amount_paid > total_amount ){
+                    alert('Amount paid should be less than total amount.');
+                    $(this).val('0.00');
+                    $('#billmaster-bill_paid_amount').val('0.00');
+                    $('#amtpaid').text('0.00');
+                    $('#balanceamt').text('0.00');
+                    return false;
+                }
+                balance = ( total_amount - amount_paid );
+                $('#billmaster-bill_paid_amount').val(amount_paid.toFixed(2));
+                $('#amtpaid').text(amount_paid.toFixed(2));
+                $('#balanceamt').text(balance.toFixed(2));
+            } else {
+                $(this).val('0.00');
+                $('#billmaster-bill_paid_amount').val('0.00');
+                $('#amtpaid').text('0.00');
+                $('#balanceamt').text('0.00');
+            }
         });
 
         ",

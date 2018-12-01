@@ -183,7 +183,20 @@ class BillController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        try {
+           $master_bill = $this->findModel($id);
+           //echo "<pre>"; print_r($master_bill->billDetails); exit;
+           //get all bill details related to the master bill
+           if( $master_bill->billDetails !== null ) {
+               foreach( $master_bill->billDetails as $detail ) {
+                   $detail->delete();
+               }
+           } 
+           $master_bill->delete();
+
+        }catch(Exception $e){
+            return $this->redirect(['index']);
+        }
 
         return $this->redirect(['index']);
     }

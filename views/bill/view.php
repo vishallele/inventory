@@ -3,11 +3,12 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\web\View;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\BillMaster */
 
-$this->title = $model->id;
+$this->title = "Tax Invoice";
 
 $subtotal = 0;
 $gst = 0;
@@ -19,7 +20,7 @@ $total_amount = 0;
 <!-- Content Header (Page header) -->
 <section class="content-header">
       <h1>
-        Bill Invoice
+        Invoice
         <small><?= $model->bill_no; ?></small>
       </h1>      
 </section>
@@ -29,9 +30,16 @@ $total_amount = 0;
       <!-- title row -->
       <div class="row">
         <div class="col-xs-12">
-          <h2 class="page-header">
-            <i class="fa fa-globe"></i> Accord Engineering
-          </h2>
+          <h1 style="text-align:center">
+            <img src="<?php echo Url::to('@web/img/').'logo.jpg' ?>" width="50px"/>
+            <i>ACCORD ENGINEERING SOLUTIONS</i>
+          </h1>
+          <p style="text-align:center">
+            13/4,Saswad-Pune Road, Opp.Indian Oil Petrol Pump, Hivarkar Mala Corner, Saswad.<br/>
+            Tal. Purandhar, Dist. Pune, Mobile No.-9595160625 <br/>
+            Email - zagadedr@gmail.com, dipzagade@yahoo.com
+          </p>
+          <hr/>
         </div>
         <!-- /.col -->
       </div>
@@ -39,7 +47,7 @@ $total_amount = 0;
       <!-- info row -->
       <div class="row invoice-info">
         <!-- /.col -->
-        <div class="col-sm-6 invoice-col">
+        <div class="col-sm-5 invoice-col">
           To
           <address>
             <strong><?= $model->customer->company_name; ?></strong><br>
@@ -49,15 +57,23 @@ $total_amount = 0;
             <?php echo (!empty($model->customer->zipcode)) ? '- '.$model->customer->zipcode.',' : ''; ?>
             <br>
             Phone: <?php echo (!empty($model->customer->phone)) ? '- '.$model->customer->phone.',' : ''; ?><br>
-            Email: <?php echo (!empty($model->customer->email)) ? '- '.$model->customer->email.',' : ''; ?>
+            <?php echo (!empty($model->customer->gst_number)) ? '<b><i>'.$model->customer->gst_number.'</i></b>': ''; ?>
           </address>
         </div>
         <!-- /.col -->
-        <div class="col-sm-6 invoice-col">
+        <div class="col-sm-3 invoice-col">
           <br/>
-          <b>Bill Invoice No: <?= $model->bill_no; ?></b><br>
+          <b>Invoice No: <?= $model->bill_no; ?></b><br>
           <b>PO No: </b><?= $model->purchase_order_no; ?><br>
-          <b>Bill Date: </b><?= date('d M Y', strtotime($model->bill_date)); ?><br>
+          <b>Dispatched By:</b> <?= $model->dispatched_by; ?><br>
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+        <div class="col-sm-4 invoice-col">
+          <br/>
+          <b>Invoice Date: </b><?= date('d M Y', strtotime($model->bill_date)); ?><br>
+          <b>P.O. Date: </b><?= date('d M Y', strtotime($model->purchase_order_date)); ?><br>
+          <b>Vehicle Number:</b> <?= $model->vehicle_number; ?><br>
         </div>
         <!-- /.col -->
       </div>
@@ -66,7 +82,7 @@ $total_amount = 0;
       <!-- Table row -->
       <div class="row">
         <div class="col-xs-12 table-responsive">
-          <table class="table table-striped">
+          <table class="table table-bordered">
             <thead>
             <tr>
               <th>Sr. No.</th>
@@ -103,28 +119,24 @@ $total_amount = 0;
 
       <div class="row">
         <!-- accepted payments column -->
-        <div class="col-xs-4">
-          <p class="lead">GST No. : 27AAJPZ6121C1ZN</p>
-          <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
-            I/We hereby certify that my/our registration certificate under the GST ACT 2017 is in force
-            on the date on which the supply of the goods specified in this tax invoice is made by me/us
-            and that the transaction of supplies covered by this tax invoice has been effected by me/us
-            and it shall be accounted for in the turnover of supplies while filling of return and the due
-            tax if any.
-          </p>
-        </div>
-        <div class="col-xs-4">
-          <p class="lead">Company Bank Detail's</p>
-          <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
-               Bank Name: Union Bank of India, Saswad <br>
+        <div class="col-xs-8">
+         <p><b>Company Bank Detail's</b></p>
+          <p class="text-muted well well-sm no-shadow" style="margin-top: 5px;">
+              <b> Bank Name: Union Bank of India, Saswad <br>
                A/c No.: 705801010050034 <br>
-               IFSC Code : UBIN0570583   
+               IFSC Code : UBIN0570583   </b>
+          </p>
+          <p><b><i>Company GST NO. - 27AAJPZ6121C1ZN</i></b></p>
+          <p>
+            <?php if( $model->bill_total_amount ) { ?>      
+                <b><i><?= ucfirst( Yii::$app->helper->getCurrencyInWord($model->bill_total_amount)); ?></i></b>
+            <?php } ?>
           </p>
         </div>
         <!-- /.col -->
         <div class="col-xs-4">
           <div class="table-responsive">
-            <table class="table">
+            <table class="table table-bordered">
               <?php 
                   $cgst = $subtotal*9/100;
                   $sgst = $subtotal*9/100;
@@ -143,7 +155,7 @@ $total_amount = 0;
                 <td style="text-align:right;"><?= number_format( $sgst, 2 ); ?></td>
               </tr>
               <tr>
-                <th style="text-align:right;">IGST (18%)</th>
+                <th style="text-align:right;">GST (18%)</th>
                 <td style="text-align:right;"><?= number_format( $igst, 2 ); ?></td>
               </tr>
               <tr>
@@ -158,12 +170,24 @@ $total_amount = 0;
       <!-- /.row -->
 
       <div class="row">
+        
+      </div>
 
+      <div class="row">
+      <div class="col-xs-12">
+            <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
+              I/We hereby certify that my/our registration certificate under the GST ACT 2017 is in force
+              on the date on which the supply of the goods specified in this tax invoice is made by me/us
+              and that the transaction of supplies covered by this tax invoice has been effected by me/us
+              and it shall be accounted for in the turnover of supplies while filling of return and the due
+              tax if any.
+            </p>
+        </div>
       </div>
 
       <div class="row clearfix">
         <br/><br/><br/>
-        <div class="col-xs-12">
+        <div class="col-xs-12"> 
            <p class="lead pull-left">Recievers Signature</p>       
            <p class="lead pull-right">For Accord Engineering Solutions.</p>
         </div>

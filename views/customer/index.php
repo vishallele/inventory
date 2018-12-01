@@ -38,7 +38,7 @@ $this->title = 'Customers';
                     ['class' => 'yii\grid\SerialColumn'],
                     'company_name',
                     'contact_person_name',
-                    'email:email',
+                    'gst_number',
                     'phone',
                     [
                         'class' => 'yii\grid\ActionColumn',

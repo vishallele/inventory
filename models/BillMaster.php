@@ -14,7 +14,7 @@ use yii\behaviors\AttributeBehavior;
  * @property string $bill_no
  * @property string $purchase_order_no
  * @property string $bill_date
- * @property string $bill_due_date
+ * @property string $purchase_order_date
  * @property string $bill_subtotal_amount
  * @property string $bill_total_amount
  * @property string $bill_paid_amount
@@ -47,9 +47,10 @@ class BillMaster extends \yii\db\ActiveRecord
         return [
             [['customer_id', 'bill_no', 'purchase_order_no', 'bill_date', 'bill_subtotal_amount', 'bill_total_amount', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate'], 'required'],
             [['customer_id', 'bill_cgst_rate', 'bill_sgst_rate', 'bill_igst_rate', 'is_active', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['bill_date', 'bill_due_date','customer'], 'safe'],
+            [['bill_date', 'purchase_order_date','customer','dispatched_by','vehicle_number'], 'safe'],
             [['bill_subtotal_amount', 'bill_total_amount', 'bill_paid_amount'], 'number'],
-            [['bill_no', 'purchase_order_no'], 'string', 'max' => 50],
+            [['bill_no', 'purchase_order_no','dispatched_by'], 'string', 'max' => 50],
+            [['vehicle_number'], 'string', 'max' => 15],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::className(), 'targetAttribute' => ['customer_id' => 'id']],
         ];
     }
@@ -65,10 +66,10 @@ class BillMaster extends \yii\db\ActiveRecord
             'bill_no' => 'Bill Number',
             'purchase_order_no' => 'PO Number',
             'bill_date' => 'Bill Date',
-            'bill_due_date' => 'Bill Due Date',
+            'purchase_order_date' => 'P.O. Date',
             'bill_subtotal_amount' => 'Subtotal Amount',
             'bill_total_amount' => 'Total Amount',
-            'bill_paid_amount' => 'Bill Paid Amount',
+            'bill_paid_amount' => 'Amount Paid',
             'bill_cgst_rate' => 'Bill Cgst Rate',
             'bill_sgst_rate' => 'Bill Sgst Rate',
             'bill_igst_rate' => 'Bill Igst Rate',
@@ -114,6 +115,17 @@ class BillMaster extends \yii\db\ActiveRecord
                 ],
                 'value' => function ($event) {
                     return date('Y-m-d H:i:s', strtotime($this->bill_date));
+                },
+            ],
+            [
+                'class' => AttributeBehavior::className(),
+                'attributes' => [
+                    //update 1 attribute 'bill_date'
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['purchase_order_date'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['purchase_order_date'],
+                ],
+                'value' => function ($event) {
+                    return date('Y-m-d H:i:s', strtotime($this->purchase_order_date));
                 },
             ]
         ];

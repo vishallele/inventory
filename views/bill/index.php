@@ -46,7 +46,14 @@ $this->title = 'Bill Masters';
                         ],
                         'bill_no',
                         'purchase_order_no',
-                        'bill_date',
+                        [
+                            'attribute' => 'bill_date',
+                            'value' => function($model){
+                                return Yii::$app->formatter->asDate($model->bill_date);
+                            },
+                            'filter' => true  
+                        ],
+                        //'bill_date',
                         //'bill_subtotal_amount',
                         'bill_total_amount',
                         //'bill_paid_amount',
